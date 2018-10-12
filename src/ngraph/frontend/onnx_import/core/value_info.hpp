@@ -25,7 +25,6 @@
 
 #include "node.hpp"
 #include "tensor.hpp"
-#include "../weights.hpp"
 
 namespace ngraph
 {

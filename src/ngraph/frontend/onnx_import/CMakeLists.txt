@@ -18,8 +18,7 @@ set(ONNX_OPSET_VERSION 9 CACHE INTERNAL "Supported version of ONNX operator set"
 
 add_library(onnx_import_interface OBJECT
         onnx.cpp
-        onnx.hpp
-        weights.hpp)
+        onnx.hpp)
 
 add_library(onnx_import STATIC
         core/attribute.cpp

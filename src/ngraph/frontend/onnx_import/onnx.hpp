@@ -20,12 +20,42 @@
 #include <string>
 
 #include "ngraph/function.hpp"
-#include "weights.hpp"
+#include "ngraph/runtime/backend.hpp"
+#include "ngraph/runtime/tensor.hpp"
 
 namespace ngraph
 {
     namespace onnx_import
     {
+        // Representation of ONNX weight (interface)
+        class Weight
+        {
+        public:
+            enum class Type
+            {
+                f16, f32, f64, i8, i16, i32, i64, u8, u16, u32, u64
+            };
+
+            Weight() = delete;
+            Weight(Type type, std::size_t dimensions, const std::size_t* shape, const void* data);
+
+            Weight(Weight&&) noexcept = default;
+            Weight& operator=(Weight&&) noexcept = default;
+
+            Weight(const Weight&);
+            Weight& operator=(const Weight&);
+
+            ~Weight() = default;
+
+            const element::Type& type() const;
+            const void* data() const;
+            const Shape& shape() const;
+
+        private:
+            struct Impl;
+            std::unique_ptr<Impl, void (*)(Impl *) > m_pimpl;
+        };
+
         // Convert on ONNX model to a vector of nGraph Functions (input stream)
         std::vector<std::shared_ptr<Function>> load_onnx_model(std::istream&,
                 const std::map<std::string, Weight>& weights = {});

@@ -93,7 +93,7 @@ namespace ngraph
 
         void Graph::load(std::istream& sin, const Span<::onnxTensorDescriptorV1>& weight_descriptors)
         {
-            onnx_import::Weights weights;
+            std::map<std::string, onnx_import::Weight> weights;
             if (weight_descriptors.data() != nullptr)
             {
                 if (weight_descriptors.empty())
