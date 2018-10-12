@@ -33,7 +33,17 @@ namespace ngraph
         public:
             enum class Type
             {
-                f16, f32, f64, i8, i16, i32, i64, u8, u16, u32, u64
+                f16,
+                f32,
+                f64,
+                i8,
+                i16,
+                i32,
+                i64,
+                u8,
+                u16,
+                u32,
+                u64
             };
 
             Weight() = delete;
@@ -53,24 +63,25 @@ namespace ngraph
 
         private:
             struct Impl;
-            std::unique_ptr<Impl, void (*)(Impl *) > m_pimpl;
+            std::unique_ptr<Impl, void (*)(Impl*)> m_pimpl;
         };
 
         // Convert on ONNX model to a vector of nGraph Functions (input stream)
-        std::vector<std::shared_ptr<Function>> load_onnx_model(std::istream&,
-                const std::map<std::string, Weight>& weights = {});
+        std::vector<std::shared_ptr<Function>>
+            load_onnx_model(std::istream&, const std::map<std::string, Weight>& weights = {});
 
         // Convert an ONNX model to a vector of nGraph Functions
-        std::vector<std::shared_ptr<Function>> load_onnx_model(const std::string&,
-                const std::map<std::string, Weight>& weights = {});
+        std::vector<std::shared_ptr<Function>>
+            load_onnx_model(const std::string&, const std::map<std::string, Weight>& weights = {});
 
         // Convert the first output of an ONNX model to an nGraph Function (input stream)
-        std::shared_ptr<Function> import_onnx_function(std::istream&,
-                const std::map<std::string, Weight>& weights = {});
+        std::shared_ptr<Function>
+            import_onnx_function(std::istream&, const std::map<std::string, Weight>& weights = {});
 
         // Convert the first output of an ONNX model to an nGraph Function
-        std::shared_ptr<Function> import_onnx_function(const std::string&,
-                const std::map<std::string, Weight>& weights = {});
+        std::shared_ptr<Function>
+            import_onnx_function(const std::string&,
+                                 const std::map<std::string, Weight>& weights = {});
 
     } // namespace onnx_import
 

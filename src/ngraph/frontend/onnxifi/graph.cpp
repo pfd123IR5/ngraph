@@ -90,8 +90,8 @@ namespace ngraph
         }
 
         bool Graph::compile() { return m_backend->compile(m_function); }
-
-        void Graph::load(std::istream& sin, const Span<::onnxTensorDescriptorV1>& weight_descriptors)
+        void Graph::load(std::istream& sin,
+                         const Span<::onnxTensorDescriptorV1>& weight_descriptors)
         {
             std::map<std::string, onnx_import::Weight> weights;
             if (weight_descriptors.data() != nullptr)

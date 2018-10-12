@@ -16,8 +16,8 @@
 
 #pragma once
 
-#include <mutex>
 #include <condition_variable>
+#include <mutex>
 
 #include <onnxifi.h>
 
@@ -89,12 +89,11 @@ namespace ngraph
                 }
 
                 template <typename Rep, typename Period>
-                bool wait_for(const std::chrono::duration<Rep,Period>& duration) const
+                bool wait_for(const std::chrono::duration<Rep, Period>& duration) const
                 {
                     std::unique_lock<std::mutex> lock{m_mutex};
-                    auto result{m_condition_variable.wait_for(lock, duration, [&] {
-                        return m_signaled;
-                    })};
+                    auto result{
+                        m_condition_variable.wait_for(lock, duration, [&] { return m_signaled; })};
                     if (Autoreset)
                     {
                         m_signaled = false;
@@ -103,12 +102,11 @@ namespace ngraph
                 }
 
                 template <typename Clock, typename Duration>
-                bool wait_until(const std::chrono::time_point<Clock,Duration>& time_point) const
+                bool wait_until(const std::chrono::time_point<Clock, Duration>& time_point) const
                 {
                     std::unique_lock<std::mutex> lock{m_mutex};
-                    auto result{m_condition_variable.wait_until(lock, time_point, [&] {
-                        return m_signaled;
-                    })};
+                    auto result{m_condition_variable.wait_until(
+                        lock, time_point, [&] { return m_signaled; })};
                     if (Autoreset)
                     {
                         m_signaled = false;

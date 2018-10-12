@@ -34,7 +34,8 @@ namespace ngraph
         class Graph
         {
         public:
-            explicit Graph(const onnx::GraphProto& proto, const OperatorSet& opset, std::map<std::string, Weight> weights = {});
+            explicit Graph(const onnx::GraphProto& proto, const OperatorSet& opset,
+                           std::map<std::string, Weight> weights = {});
 
             const std::vector<Node>& get_nodes() const { return m_nodes; }
             const std::vector<ValueInfo>& get_inputs() const { return m_inputs; }
