@@ -36,7 +36,9 @@ namespace ngraph
             }
         }
 
-        Graph::Graph(const onnx::GraphProto& graph_proto, const OperatorSet& opset, std::map<std::string, Weight> weights)
+        Graph::Graph(const onnx::GraphProto& graph_proto,
+                     const OperatorSet& opset,
+                     std::map<std::string, Weight> weights)
             : m_graph_proto{&graph_proto}
             , m_opset{&opset}
             , m_weights{std::move(weights)}

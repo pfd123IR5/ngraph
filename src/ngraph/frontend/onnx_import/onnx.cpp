@@ -147,7 +147,8 @@ namespace ngraph
             std::vector<std::shared_ptr<Function>> output_functions;
             Model model{model_proto};
             Graph graph{model_proto.graph(),
-                        ops_bridge::get_operator_set(model.get_opset_version()), weights};
+                        ops_bridge::get_operator_set(model.get_opset_version()),
+                        weights};
             for (const auto& output : graph.get_outputs())
             {
                 output_functions.emplace_back(std::make_shared<Function>(

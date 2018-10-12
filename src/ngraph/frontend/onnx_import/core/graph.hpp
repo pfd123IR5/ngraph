@@ -23,8 +23,8 @@
 
 #include "ngraph/op/parameter_vector.hpp"
 
-#include "operator_set.hpp"
 #include "../onnx.hpp"
+#include "operator_set.hpp"
 #include "value_info.hpp"
 
 namespace ngraph
@@ -34,7 +34,8 @@ namespace ngraph
         class Graph
         {
         public:
-            explicit Graph(const onnx::GraphProto& proto, const OperatorSet& opset,
+            explicit Graph(const onnx::GraphProto& proto,
+                           const OperatorSet& opset,
                            std::map<std::string, Weight> weights = {});
 
             const std::vector<Node>& get_nodes() const { return m_nodes; }
