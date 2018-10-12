@@ -51,64 +51,64 @@ namespace ngraph
 
             public:
                 size_t build_pad(const std::vector<std::string>& dtypes,
-                                 NVShape input_shape,
-                                 NVShape output_shape,
-                                 NVShape padding_below,
-                                 NVShape padding_interior);
+                                 const NVShape& input_shape,
+                                 const NVShape& output_shape,
+                                 const NVShape& padding_below,
+                                 const NVShape& padding_interior);
 
                 size_t build_pad_fill(const std::vector<std::string>& dtypes,
-                                      NVShape input_shape,
-                                      NVShape output_shape,
-                                      NVShape padding_below,
-                                      NVShape padding_interior);
+                                      const NVShape& input_shape,
+                                      const NVShape& output_shape,
+                                      const NVShape& padding_below,
+                                      const NVShape& padding_interior);
 
                 size_t build_1d_max_pool(const std::array<std::string, 2>& dtypes,
-                                         NVShape input_shape,
-                                         NVShape output_shape,
+                                         const NVShape& input_shape,
+                                         const NVShape& output_shape,
                                          size_t window_width,
                                          size_t window_stride);
 
                 size_t build_avg_pool(const std::array<std::string, 2>& dtypes,
-                                      NVShape input_shape,
-                                      NVShape output_shape,
-                                      NVShape window_shape,
-                                      NVShape window_stride,
-                                      NVShape padding_below,
+                                      const NVShape& input_shape,
+                                      const NVShape& output_shape,
+                                      const NVShape& window_shape,
+                                      const NVShape& window_stride,
+                                      const NVShape& padding_below,
                                       bool include_pad = false);
 
                 size_t build_slice(const std::array<std::string, 2>& dtypes,
-                                   NVShape input_shape,
-                                   NVShape lower_bounds,
-                                   NVShape slice_strides,
-                                   NVShape output_shape);
+                                   const NVShape& input_shape,
+                                   const NVShape& lower_bounds,
+                                   const NVShape& slice_strides,
+                                   const NVShape& output_shape);
 
                 size_t build_reduce_window(const OpName op_name,
                                            const std::vector<std::string>& dtypes,
-                                           NVShape input_shape,
-                                           NVShape output_shape,
-                                           NVShape reduce_window_shape,
-                                           NVShape reduce_window_strides);
+                                           const NVShape& input_shape,
+                                           const NVShape& output_shape,
+                                           const NVShape& reduce_window_shape,
+                                           const NVShape& reduce_window_strides);
 
                 size_t build_reverse_sequence(const std::array<std::string, 3>& dtypes,
-                                              NVShape input_shape0,
-                                              NVShape input_shape1,
-                                              NVShape output_shape,
+                                              const NVShape& input_shape0,
+                                              const NVShape& input_shape1,
+                                              const NVShape& output_shape,
                                               size_t batch_axis,
                                               size_t sequence_axis);
 
                 size_t build_onehot(const std::array<std::string, 2>& dtypes,
-                                    NVShape input_shape,
-                                    NVShape output_shape,
+                                    const NVShape& input_shape,
+                                    const NVShape& output_shape,
                                     size_t one_hot_axis,
                                     size_t output_datatype_size);
 
                 size_t build_reverse(const std::array<std::string, 2>& dtypes,
-                                     NVShape input_shape,
-                                     std::vector<uint32_t> reverse_axes);
+                                     const NVShape& input_shape,
+                                     const std::vector<uint32_t>& reverse_axes);
 
                 template <typename T>
                 size_t build_elementwise(const std::vector<std::string>& dtypes,
-                                         NVShape tensor_shape)
+                                         const NVShape& tensor_shape)
                 {
                     return build_elementwise_n_to_1(
                         dtypes, tensor_shape, CudaOpMap<T>::op, CudaOpMap<T>::math_kernel);
@@ -117,8 +117,8 @@ namespace ngraph
                 template <typename T>
                 size_t build_reduce(const std::vector<std::string>& dtypes,
                                     const size_t data_bytes,
-                                    NVShape input_shape,
-                                    NVShape reduce_axis)
+                                    const NVShape& input_shape,
+                                    const NVShape& reduce_axis)
                 {
                     return build_reduce(dtypes,
                                         data_bytes,
@@ -130,7 +130,7 @@ namespace ngraph
 
                 template <typename ELEMENTWISE_OP_TYPE, typename REDUCE_OP_TYPE = ngraph::op::Nop>
                 size_t build_elementwise_collective(const std::vector<std::string>& dtypes,
-                                                    NVShape tensor_shape,
+                                                    const NVShape& tensor_shape,
                                                     const std::set<size_t>& reduced_tensors = {},
                                                     const std::set<size_t>& axes = {},
                                                     bool save_elementwise = false)
@@ -146,39 +146,39 @@ namespace ngraph
                 }
 
                 size_t build_broadcast(const std::array<std::string, 2>& dtypes,
-                                       NVShape result_shape,
+                                       const NVShape& result_shape,
                                        const std::set<size_t>& bcast_axes);
 
                 size_t build_reshape(const std::array<std::string, 2>& dtypes,
-                                     NVShape input_shape,
-                                     NVShape input_order);
+                                     const NVShape& input_shape,
+                                     const NVShape& input_order);
 
                 size_t build_reshape_2d(const std::array<std::string, 2>& dtypes,
-                                        NVShape input_shape,
-                                        NVShape input_order);
+                                        const NVShape& input_shape,
+                                        const NVShape& input_order);
 
                 size_t build_reshape_3d(const std::array<std::string, 2>& dtypes,
-                                        NVShape input_shape,
-                                        NVShape input_order);
+                                        const NVShape& input_shape,
+                                        const NVShape& input_order);
 
                 size_t build_convolution(const std::array<std::string, 3>& dtypes,
-                                         NVShape input_shape,
-                                         NVShape filter_shape,
-                                         NVShape output_shape,
-                                         NVShape filter_stride,
-                                         NVShape filter_dilation,
-                                         NVShape input_dilation,
+                                         const NVShape& input_shape,
+                                         const NVShape& filter_shape,
+                                         const NVShape& output_shape,
+                                         const NVShape& filter_stride,
+                                         const NVShape& filter_dilation,
+                                         const NVShape& input_dilation,
                                          NVDiff input_pad_below);
 
                 size_t build_concat(const std::vector<std::string>& dtypes,
-                                    std::vector<NVShape> input_shapes,
+                                    const std::vector<NVShape>& input_shapes,
                                     size_t concat_axis,
-                                    NVShape output_shape);
+                                    const NVShape& output_shape);
 
                 size_t build_softmax_divide(const std::vector<std::string>& dtypes,
-                                            NVShape input_shape,
-                                            NVShape reduce_shape,
-                                            std::vector<size_t> axes_flag);
+                                            const NVShape& input_shape,
+                                            const NVShape& reduce_shape,
+                                            const std::vector<size_t>& axes_flag);
 
                 void debug_sync();
                 void sync();
@@ -188,14 +188,14 @@ namespace ngraph
                 uint32_t align_to_block_size(uint32_t threads, uint32_t block_size);
                 void print_tensor_from_gpu(codegen::CodeWriter& writer,
                                            const std::string& tensor_name,
-                                           NVShape shape);
+                                           const NVShape& shape);
                 std::string include_helpers();
                 size_t build_elementwise_n_to_1(const std::vector<std::string>& dtypes,
-                                                NVShape tensor_shape,
+                                                const NVShape& tensor_shape,
                                                 const char* op,
                                                 const char* kernel);
                 size_t build_fused_ew_to_collective(const std::vector<std::string>& dtypes,
-                                                    NVShape tensor_shape,
+                                                    const NVShape& tensor_shape,
                                                     const std::set<size_t>& reduced_tensors,
                                                     const std::set<size_t>& axes,
                                                     const char* op,
@@ -204,18 +204,18 @@ namespace ngraph
                                                     bool save_elementwise);
                 size_t build_reduce(const std::vector<std::string>& dtypes,
                                     const size_t data_bytes,
-                                    NVShape input_shape,
-                                    NVShape reduce_axis,
+                                    const NVShape& input_shape,
+                                    const NVShape& reduce_axis,
                                     const char* op,
                                     const char* kernel);
                 size_t build_reduce_to_nd(const std::vector<std::string>& dtypes,
-                                          NVShape input_shape,
-                                          NVShape reduce_axis,
+                                          const NVShape& input_shape,
+                                          const NVShape& reduce_axis,
                                           const char* op,
                                           const char* kernel);
                 size_t build_reduce_to_scalar(const std::vector<std::string>& dtypes,
                                               const size_t data_bytes,
-                                              NVShape input_shape,
+                                              const NVShape& input_shape,
                                               const char* op,
                                               const char* kernel);
 
@@ -223,8 +223,8 @@ namespace ngraph
                 //The number can be tuned based on hardware.
                 //This cuda kernel will accumulate reduction to a certain number of bins depends on hardware.
                 size_t build_reduce_to_scalar_acc(const std::vector<std::string>& dtypes,
-                                                  NVShape input_shape,
-                                                  NVShape output_shape,
+                                                  const NVShape& input_shape,
+                                                  const NVShape& output_shape,
                                                   uint32_t block_size_x,
                                                   const char* op,
                                                   const char* kernel);

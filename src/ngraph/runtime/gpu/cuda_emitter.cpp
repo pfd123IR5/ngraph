@@ -76,9 +76,9 @@ runtime::gpu::CUDAEmitter::CUDAEmitter(runtime::gpu::GPUPrimitiveEmitter* emitte
 }
 
 size_t runtime::gpu::CUDAEmitter::build_concat(const std::vector<std::string>& dtypes,
-                                               std::vector<NVShape> input_shapes,
+                                               const std::vector<NVShape>& input_shapes,
                                                size_t concat_axis,
-                                               NVShape output_shape)
+                                               const NVShape& output_shape)
 {
     std::stringstream kernel_name;
     size_t input_size = input_shapes.size();
@@ -168,8 +168,8 @@ size_t runtime::gpu::CUDAEmitter::build_concat(const std::vector<std::string>& d
 }
 
 size_t runtime::gpu::CUDAEmitter::build_onehot(const std::array<std::string, 2>& dtypes,
-                                               NVShape input_shape,
-                                               NVShape output_shape,
+                                               const NVShape& input_shape,
+                                               const NVShape& output_shape,
                                                size_t one_hot_axis,
                                                size_t output_datatype_size)
 {
@@ -239,8 +239,8 @@ size_t runtime::gpu::CUDAEmitter::build_onehot(const std::array<std::string, 2>&
 }
 
 size_t runtime::gpu::CUDAEmitter::build_reverse(const std::array<std::string, 2>& dtypes,
-                                                NVShape input_shape,
-                                                std::vector<uint32_t> reverse_axes)
+                                                const NVShape& input_shape,
+                                                const std::vector<uint32_t>& reverse_axes)
 {
     uint32_t rank = static_cast<uint32_t>(input_shape.size());
     std::stringstream kernel_name;
@@ -310,10 +310,10 @@ size_t runtime::gpu::CUDAEmitter::build_reverse(const std::array<std::string, 2>
 }
 
 size_t runtime::gpu::CUDAEmitter::build_pad(const std::vector<std::string>& dtypes,
-                                            NVShape input_shape,
-                                            NVShape output_shape,
-                                            NVShape padding_below,
-                                            NVShape padding_interior)
+                                            const NVShape& input_shape,
+                                            const NVShape& output_shape,
+                                            const NVShape& padding_below,
+                                            const NVShape& padding_interior)
 {
     uint32_t rank = static_cast<uint32_t>(input_shape.size());
     std::stringstream kernel_name;
@@ -395,10 +395,10 @@ size_t runtime::gpu::CUDAEmitter::build_pad(const std::vector<std::string>& dtyp
 }
 
 size_t runtime::gpu::CUDAEmitter::build_pad_fill(const std::vector<std::string>& dtypes,
-                                                 NVShape input_shape,
-                                                 NVShape output_shape,
-                                                 NVShape padding_below,
-                                                 NVShape padding_interior)
+                                                 const NVShape& input_shape,
+                                                 const NVShape& output_shape,
+                                                 const NVShape& padding_below,
+                                                 const NVShape& padding_interior)
 {
     uint32_t rank = static_cast<uint32_t>(input_shape.size());
     std::stringstream kernel_name;
@@ -483,8 +483,8 @@ size_t runtime::gpu::CUDAEmitter::build_pad_fill(const std::vector<std::string>&
 }
 
 size_t runtime::gpu::CUDAEmitter::build_reshape(const std::array<std::string, 2>& dtypes,
-                                                NVShape input_shape,
-                                                NVShape input_order)
+                                                const NVShape& input_shape,
+                                                const NVShape& input_order)
 {
     auto rank = input_shape.size();
     std::stringstream kernel_name;
@@ -567,8 +567,8 @@ size_t runtime::gpu::CUDAEmitter::build_reshape(const std::array<std::string, 2>
 }
 
 size_t runtime::gpu::CUDAEmitter::build_reshape_2d(const std::array<std::string, 2>& dtypes,
-                                                   NVShape input_shape,
-                                                   NVShape input_order)
+                                                   const NVShape& input_shape,
+                                                   const NVShape& input_order)
 {
     auto rank = input_shape.size();
     std::stringstream kernel_name;
@@ -652,8 +652,8 @@ size_t runtime::gpu::CUDAEmitter::build_reshape_2d(const std::array<std::string,
     return this->m_primitive_emitter->register_primitive(kernel_launch, hash);
 }
 size_t runtime::gpu::CUDAEmitter::build_reshape_3d(const std::array<std::string, 2>& dtypes,
-                                                   NVShape input_shape,
-                                                   NVShape input_order)
+                                                   const NVShape& input_shape,
+                                                   const NVShape& input_order)
 {
     auto rank = input_shape.size();
     std::stringstream kernel_name;
@@ -743,10 +743,10 @@ size_t runtime::gpu::CUDAEmitter::build_reshape_3d(const std::array<std::string,
 }
 
 size_t runtime::gpu::CUDAEmitter::build_slice(const std::array<std::string, 2>& dtypes,
-                                              NVShape input_shape,
-                                              NVShape lower_bounds,
-                                              NVShape slice_strides,
-                                              NVShape output_shape)
+                                              const NVShape& input_shape,
+                                              const NVShape& lower_bounds,
+                                              const NVShape& slice_strides,
+                                              const NVShape& output_shape)
 {
     std::stringstream kernel_name;
     kernel_name << "slice_" << join(dtypes, "_") << "_r_" << output_shape.size();
@@ -830,9 +830,9 @@ size_t runtime::gpu::CUDAEmitter::build_slice(const std::array<std::string, 2>& 
 }
 
 size_t runtime::gpu::CUDAEmitter::build_reverse_sequence(const std::array<std::string, 3>& dtypes,
-                                                         NVShape input_shape0,
-                                                         NVShape input_shape1,
-                                                         NVShape output_shape,
+                                                         const NVShape& input_shape0,
+                                                         const NVShape& input_shape1,
+                                                         const NVShape& output_shape,
                                                          size_t batch_axis,
                                                          size_t sequence_axis)
 {
@@ -911,8 +911,8 @@ size_t runtime::gpu::CUDAEmitter::build_reverse_sequence(const std::array<std::s
 }
 
 size_t runtime::gpu::CUDAEmitter::build_1d_max_pool(const std::array<std::string, 2>& dtypes,
-                                                    NVShape input_shape,
-                                                    NVShape output_shape,
+                                                    const NVShape& input_shape,
+                                                    const NVShape& output_shape,
                                                     size_t window_width,
                                                     size_t window_stride)
 {
@@ -1038,11 +1038,11 @@ pooling_op_shape
 }
 
 size_t runtime::gpu::CUDAEmitter::build_avg_pool(const std::array<std::string, 2>& dtypes,
-                                                 NVShape input_shape,
-                                                 NVShape output_shape,
-                                                 NVShape window_shape,
-                                                 NVShape window_stride,
-                                                 NVShape padding_below,
+                                                 const NVShape& input_shape,
+                                                 const NVShape& output_shape,
+                                                 const NVShape& window_shape,
+                                                 const NVShape& window_stride,
+                                                 const NVShape& padding_below,
                                                  bool include_pad)
 {
     // assumes NCDHW format
@@ -1155,7 +1155,7 @@ size_t runtime::gpu::CUDAEmitter::build_avg_pool(const std::array<std::string, 2
 }
 
 size_t runtime::gpu::CUDAEmitter::build_elementwise_n_to_1(const std::vector<std::string>& dtypes,
-                                                           NVShape tensor_shape,
+                                                           const NVShape& tensor_shape,
                                                            const char* op,
                                                            const char* kernel)
 {
@@ -1330,9 +1330,9 @@ size_t runtime::gpu::CUDAEmitter::build_primitive(const op::MaxPool* node)
 }
 
 size_t runtime::gpu::CUDAEmitter::build_softmax_divide(const std::vector<std::string>& dtypes,
-                                                       NVShape input_shape,
-                                                       NVShape reduce_shape,
-                                                       std::vector<size_t> axes_flag)
+                                                       const NVShape& input_shape,
+                                                       const NVShape& reduce_shape,
+                                                       const std::vector<size_t>& axes_flag)
 {
     std::string kernel_name =
         "softmax_divide_" + join(dtypes, "_") + "_axes_" + join(axes_flag, "_");
@@ -1404,8 +1404,8 @@ size_t runtime::gpu::CUDAEmitter::build_softmax_divide(const std::vector<std::st
 }
 
 size_t runtime::gpu::CUDAEmitter::build_reduce_to_nd(const std::vector<std::string>& dtypes,
-                                                     NVShape input_shape,
-                                                     NVShape reduce_axis,
+                                                     const NVShape& input_shape,
+                                                     const NVShape& reduce_axis,
                                                      const char* op,
                                                      const char* kernel)
 {
@@ -1507,7 +1507,7 @@ size_t runtime::gpu::CUDAEmitter::build_reduce_to_nd(const std::vector<std::stri
 
 size_t runtime::gpu::CUDAEmitter::build_reduce_to_scalar(const std::vector<std::string>& dtypes,
                                                          const size_t data_bytes,
-                                                         NVShape input_shape,
+                                                         const NVShape& input_shape,
                                                          const char* op,
                                                          const char* kernel)
 {
@@ -1582,8 +1582,8 @@ size_t runtime::gpu::CUDAEmitter::build_reduce_to_scalar(const std::vector<std::
 }
 
 size_t runtime::gpu::CUDAEmitter::build_reduce_to_scalar_acc(const std::vector<std::string>& dtypes,
-                                                             NVShape input_shape,
-                                                             NVShape output_shape,
+                                                             const NVShape& input_shape,
+                                                             const NVShape& output_shape,
                                                              uint32_t block_size_x,
                                                              const char* op,
                                                              const char* kernel)
@@ -1650,8 +1650,8 @@ size_t runtime::gpu::CUDAEmitter::build_reduce_to_scalar_acc(const std::vector<s
 
 size_t runtime::gpu::CUDAEmitter::build_reduce(const std::vector<std::string>& dtypes,
                                                const size_t data_bytes,
-                                               NVShape input_shape,
-                                               NVShape reduce_axis,
+                                               const NVShape& input_shape,
+                                               const NVShape& reduce_axis,
                                                const char* op,
                                                const char* kernel)
 {
@@ -1703,7 +1703,7 @@ size_t runtime::gpu::CUDAEmitter::build_reduce(const std::vector<std::string>& d
         const uint32_t unroll_size = 8;
         if (nthreads > nthreads_acc * (unroll_size + 1))
         {
-            NVShape acc_output_shape{nthreads_acc};
+            const NVShape& acc_output_shape{nthreads_acc};
             size_t reduce_scalar_acc_idx = build_reduce_to_scalar_acc(
                 dtypes, input_shape, acc_output_shape, block_size_x_acc, op, kernel);
             size_t reduce_scalar_idx =
@@ -1820,7 +1820,7 @@ size_t runtime::gpu::CUDAEmitter::build_primitive(const op::Softmax* node)
 
 size_t
     runtime::gpu::CUDAEmitter::build_fused_ew_to_collective(const std::vector<std::string>& dtypes,
-                                                            NVShape tensor_shape,
+                                                            const NVShape& tensor_shape,
                                                             const std::set<size_t>& reduced_tensors,
                                                             const std::set<size_t>& axes,
                                                             const char* op,
@@ -1949,10 +1949,10 @@ size_t
 
 size_t runtime::gpu::CUDAEmitter::build_reduce_window(const OpName op_name,
                                                       const std::vector<std::string>& dtypes,
-                                                      NVShape input_shape,
-                                                      NVShape output_shape,
-                                                      NVShape reduce_window_shape,
-                                                      NVShape reduce_window_strides)
+                                                      const NVShape& input_shape,
+                                                      const NVShape& output_shape,
+                                                      const NVShape& reduce_window_shape,
+                                                      const NVShape& reduce_window_strides)
 {
     const char* op = NULL;
     const char* kernel = NULL;
@@ -2061,7 +2061,7 @@ size_t runtime::gpu::CUDAEmitter::build_reduce_window(const OpName op_name,
 }
 
 size_t runtime::gpu::CUDAEmitter::build_broadcast(const std::array<std::string, 2>& dtypes,
-                                                  NVShape result_shape,
+                                                  const NVShape& result_shape,
                                                   const std::set<size_t>& reduce_axes)
 {
     // assumes NC{d1,...,dn} format
@@ -2360,12 +2360,12 @@ size_t runtime::gpu::CUDAEmitter::build_primitive(const op::ReplaceSlice* node, 
 }
 
 size_t runtime::gpu::CUDAEmitter::build_convolution(const std::array<std::string, 3>& dtypes,
-                                                    NVShape input_shape,
-                                                    NVShape filter_shape,
-                                                    NVShape output_shape,
-                                                    NVShape filter_stride,
-                                                    NVShape filter_dilation,
-                                                    NVShape input_dilation,
+                                                    const NVShape& input_shape,
+                                                    const NVShape& filter_shape,
+                                                    const NVShape& output_shape,
+                                                    const NVShape& filter_stride,
+                                                    const NVShape& filter_dilation,
+                                                    const NVShape& input_dilation,
                                                     NVDiff input_pad_below)
 {
     // convolution is performed on tensors in the following format
@@ -2569,7 +2569,7 @@ size_t runtime::gpu::CUDAEmitter::build_convolution(const std::array<std::string
 
 void runtime::gpu::CUDAEmitter::print_tensor_from_gpu(codegen::CodeWriter& writer,
                                                       const std::string& tensor_name,
-                                                      NVShape shape)
+                                                      const NVShape& shape)
 {
     auto strides = row_major_strides(shape);
     writer << "__syncthreads();\n";
