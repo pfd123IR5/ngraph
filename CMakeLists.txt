@@ -203,11 +203,7 @@ if(WIN32)
 endif()
 
 if (NGRAPH_CPU_ENABLE)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DNGRAPH_CPU_ENABLE")	
-endif()
-
-if (NGRAPH_HYBRID_ENABLE)
-    unit_test_control(BACKEND HYBRID MANIFEST src/ngraph/runtime/hybrid/unit_test.manifest)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DNGRAPH_CPU_ENABLE")
 endif()
 
 if (NOT DEFINED NGRAPH_TBB_ENABLE)
