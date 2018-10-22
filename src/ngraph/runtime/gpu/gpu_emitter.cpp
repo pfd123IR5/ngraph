@@ -164,12 +164,59 @@ void runtime::gpu::GPU_Emitter::emit_And(EMIT_ARGS)
 
 void runtime::gpu::GPU_Emitter::emit_ArgMax(EMIT_ARGS)
 {
-    throw unsupported_op("Unsupported op '" + node->description() + "'");
+    cudnnReduceTensorOp_t reduce_op = CUDNN_REDUCE_TENSOR_MAX;
+    runtime::gpu::GPU_Emitter::emit_ArgReduce(
+        external_function, writer, node, args, out, reduce_op);
 }
 
 void runtime::gpu::GPU_Emitter::emit_ArgMin(EMIT_ARGS)
 {
-    throw unsupported_op("Unsupported op '" + node->description() + "'");
+    cudnnReduceTensorOp_t reduce_op = CUDNN_REDUCE_TENSOR_MIN;
+    runtime::gpu::GPU_Emitter::emit_ArgReduce(
+        external_function, writer, node, args, out, reduce_op);
+}
+
+void runtime::gpu::GPU_Emitter::emit_ArgReduce(EMIT_ARGS, cudnnReduceTensorOp_t reduce_op)
+{
+    if (out[0].get_size() == 0)
+    {
+        return;
+    }
+
+    size_t axis;
+    if (reduce_op == CUDNN_REDUCE_TENSOR_MIN)
+    {
+        auto argmin = static_cast<const ngraph::op::ArgMin*>(node);
+        axis = argmin->get_reduction_axis();
+    }
+    else if (reduce_op == CUDNN_REDUCE_TENSOR_MAX)
+    {
+        auto argmax = static_cast<const ngraph::op::ArgMax*>(node);
+        axis = argmax->get_reduction_axis();
+    }
+    else
+    {
+        throw std::runtime_error("Not supported. Only Min/Max op are supported by ArgReduce.");
+    }
+    auto axis_set = AxisSet{axis};
+
+    std::vector<element::Type> dtypes{args[0].get_element_type(), out[0].get_element_type()};
+
+    writer.block_begin();
+    {
+        auto& cudnn_emitter = external_function->get_primitive_emitter()->get_cudnn_emitter();
+
+        auto index = cudnn_emitter->build_reduce_forward(reduce_op,
+                                                         dtypes,
+                                                         args[0].get_shape(),
+                                                         axis_set,
+                                                         CUDNNEmitter::ReductionMode::ArgReduce);
+
+        writer << "void* input[] = {" << node_names(args) << "};\n";
+        writer << "void* output[] = {" << node_names(out) << "};\n";
+        writer << "gpu::invoke_primitive(ctx, " << index << ", input, output);\n";
+    }
+    writer.block_end();
 }
 
 void runtime::gpu::GPU_Emitter::emit_Asin(EMIT_ARGS)
@@ -200,35 +247,33 @@ void runtime::gpu::GPU_Emitter::emit_AvgPool(EMIT_ARGS)
         {
             auto& cuda_emitter = external_function->get_primitive_emitter()->get_cuda_emitter();
 
-            index = cuda_emitter->build_avg_pool({{args[0].get_type(), out[0].get_type()}},
+            index =
+                cuda_emitter->build_avg_pool({{args[0].get_type(), out[0].get_type()}},
+                                             input_shape,
+                                             result_shape,
+                                             avg_pool->get_window_shape(),
+                                             avg_pool->get_window_movement_strides(),
+                                             padding_below,
+                                             avg_pool->get_include_padding_in_avg_computation());
+        }
+        // 2d and 3d avg pool (NCHW) with either symetric padding or no padding
+        else if (input_shape.size() == 4 || input_shape.size() == 5)
+        {
+            auto& cudnn_emitter = external_function->get_primitive_emitter()->get_cudnn_emitter();
+
+            auto cudnn_avg_type = avg_pool->get_include_padding_in_avg_computation()
+                                      ? CUDNN_POOLING_AVERAGE_COUNT_INCLUDE_PADDING
+                                      : CUDNN_POOLING_AVERAGE_COUNT_EXCLUDE_PADDING;
+
+            index = cudnn_emitter->build_pooling(cudnn_avg_type,
+                                                 out[0].get_type(),
+                                                 CUDNNEmitter::Prop::Forward,
                                                  input_shape,
                                                  result_shape,
-                                                 avg_pool->get_window_shape(),
                                                  avg_pool->get_window_movement_strides(),
-                                                 padding_below);
-        }
-        else if (input_shape.size() <= 5)
-        {
-            // 2d and 3d avg pool (NCHW) with either symetric padding or no padding
-            if (input_shape.size() == 4 || input_shape.size() == 5)
-            {
-                auto& cudnn_emitter =
-                    external_function->get_primitive_emitter()->get_cudnn_emitter();
-
-                auto cudnn_avg_type = avg_pool->get_include_padding_in_avg_computation()
-                                          ? CUDNN_POOLING_AVERAGE_COUNT_INCLUDE_PADDING
-                                          : CUDNN_POOLING_AVERAGE_COUNT_EXCLUDE_PADDING;
-
-                index = cudnn_emitter->build_pooling(cudnn_avg_type,
-                                                     out[0].get_type(),
-                                                     CUDNNEmitter::Prop::Forward,
-                                                     input_shape,
-                                                     result_shape,
-                                                     avg_pool->get_window_movement_strides(),
-                                                     avg_pool->get_window_shape(),
-                                                     padding_below,
-                                                     padding_above);
-            }
+                                                 avg_pool->get_window_shape(),
+                                                 padding_below,
+                                                 padding_above);
         }
         else
         {
@@ -856,6 +901,7 @@ void runtime::gpu::GPU_Emitter::emit_Power(EMIT_ARGS)
 void runtime::gpu::GPU_Emitter::emit_Product(EMIT_ARGS)
 {
     const ngraph::op::Product* product = static_cast<const ngraph::op::Product*>(node);
+
     writer.block_begin();
     {
         if (out[0].get_size() != 0)
@@ -877,12 +923,16 @@ void runtime::gpu::GPU_Emitter::emit_Product(EMIT_ARGS)
             // descriptors for tensors  with <= 4 dimensions
             else
             {
+                std::vector<element::Type> dtypes{args[0].get_element_type(),
+                                                  out[0].get_element_type()};
                 auto& cudnn_emitter =
                     external_function->get_primitive_emitter()->get_cudnn_emitter();
-                auto index = cudnn_emitter->build_reduce_forward(CUDNN_REDUCE_TENSOR_MUL,
-                                                                 out[0].get_type(),
-                                                                 args[0].get_shape(),
-                                                                 product->get_reduction_axes());
+                auto index =
+                    cudnn_emitter->build_reduce_forward(CUDNN_REDUCE_TENSOR_MUL,
+                                                        dtypes,
+                                                        args[0].get_shape(),
+                                                        product->get_reduction_axes(),
+                                                        CUDNNEmitter::ReductionMode::Reduce);
 
                 writer << "void* input[] = {" << node_names(args) << "};\n";
                 writer << "void* output[] = {" << node_names(out) << "};\n";
@@ -971,14 +1021,16 @@ void runtime::gpu::GPU_Emitter::emit_Reduce(EMIT_ARGS)
                         reduce_tensor_op = f_ptr->second;
                     }
                 }
-
+                std::vector<element::Type> dtypes{args[0].get_element_type(),
+                                                  out[0].get_element_type()};
                 auto& cudnn_emitter =
                     external_function->get_primitive_emitter()->get_cudnn_emitter();
                 auto reduce_index =
                     cudnn_emitter->build_reduce_forward(reduce_tensor_op,
-                                                        out[0].get_type(),
+                                                        dtypes,
                                                         args[0].get_shape(),
-                                                        reduce_op->get_reduction_axes());
+                                                        reduce_op->get_reduction_axes(),
+                                                        CUDNNEmitter::ReductionMode::Reduce);
 
                 writer << "void* input[] = {" << node_names(args) << "};\n";
                 writer << "void* output[] = {" << node_names(out) << "};\n";
