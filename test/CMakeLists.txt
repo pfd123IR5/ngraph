@@ -83,6 +83,10 @@ if (NGRAPH_INTELGPU_ENABLE)
     set(ACTIVE_BACKEND_LIST ${ACTIVE_BACKEND_LIST} INTELGPU)
 endif()
 
+if (NGRAPH_MYRIADX_ENABLE)
+    set(ACTIVE_BACKEND_LIST ${ACTIVE_BACKEND_LIST} MYRIADX)
+endif()
+
 add_subdirectory(models)
 add_subdirectory(files)
 add_subdirectory(util)

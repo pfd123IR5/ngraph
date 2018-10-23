@@ -27,3 +27,8 @@ endif()
 if (NGRAPH_GPU_ENABLE)
     add_subdirectory(gpu)
 endif()
+
+if (NGRAPH_MYRIADX_ENABLE)
+    add_subdirectory(myriadx)
+endif()
+

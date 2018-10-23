@@ -42,6 +42,7 @@ namespace ngraph
         CPU,
         GPU,
         NNP,
+        MyriadX,
     };
 
     std::string placement_to_string(Placement placement);
