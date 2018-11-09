@@ -25,7 +25,7 @@ set(SRC
 if (NGRAPH_MYRIADX_ENABLE)
     add_library(myriadx_backend SHARED ${SRC})
     set_target_properties(myriadx_backend PROPERTIES VERSION ${NGRAPH_VERSION} SOVERSION ${NGRAPH_API_VERSION})
-    target_link_libraries(myriadx_backend PUBLIC ngraph)
+    target_link_libraries(myriadx_backend PUBLIC ngraph cm)
     find_package(CLDNN REQUIRED)
     target_include_directories(myriadx_backend SYSTEM PUBLIC ${CLDNN_INCLUDE_DIRS})
     target_link_libraries(myriadx_backend PUBLIC ${CLDNN_LIBRARIES})

@@ -24,6 +24,9 @@
 #include "ngraph/runtime/myriadx/myriadx_layout.hpp"
 #include "ngraph/runtime/myriadx/myriadx_op_convolution.hpp"
 #include "ngraph/runtime/myriadx/myriadx_tensor_view.hpp"
+#include "ngraph/runtime/myriadx/compilation_unit.hpp"
+#include "ngraph/runtime/myriadx/compositional_model_recorder.hpp"
+#include "ngraph/runtime/myriadx/logger.hpp"
 
 #include "ngraph/function.hpp"
 #include "ngraph/node.hpp"
@@ -52,6 +55,9 @@
 #include "ngraph/op/softmax.hpp"
 #include "ngraph/op/sum.hpp"
 #include "ngraph/util.hpp"
+
+#include <math.h>
+#include <iostream>
 
 using namespace std;
 using namespace ngraph;
@@ -172,6 +178,7 @@ extern "C" const char* get_ngraph_version_string()
 
 extern "C" runtime::Backend* new_backend(const char* configuration_string)
 {
+std::cout << "calling  myriadx BE constructor" << std::endl;
     return new runtime::myriadx::MyriadXBackend();
 }
 
@@ -463,6 +470,8 @@ std::cout << "in MB compile" << std::endl;
         {
 std::cout << "in case do convolution " << std::endl;
 
+/*
+
             arguments_check(op, 2, 1);
 
             const shared_ptr<op::Convolution> conv_op = static_pointer_cast<op::Convolution>(op);
@@ -498,7 +507,41 @@ std::cout << "in case do convolution " << std::endl;
                                          "filter[output_channel][input_channel]",
                                          "output[batch][output_channel]",
                                          false);
-            }
+*/
+        auto unit = new mv::CompilationUnit("test_backend");
+
+        mv::Logger::setVerboseLevel(mv::Logger::VerboseLevel::VerboseDebug);
+        unit->loadTargetDescriptor(mv::Target::ma2480);
+
+    mv::CompositionalModel& test_cm = unit->model();
+
+    // Compose minimal functional computation model - one computation operation of type conv2D
+    auto input1 = test_cm.input({32, 32, 1}, mv::DTypeType::Float16, mv::Order("WHC"));
+    std::vector<double> weights1Data({ 0.1111, 0.1121, 0.1131, 0.1141, 0.1151, 0.1161, 0.1171, 0.1181, 0.1191});
+    auto weights1 = test_cm.constant(weights1Data, {3, 3, 1, 1}, mv::DTypeType::Float16, mv::Order("NCHW"));
+    auto conv1 = test_cm.conv2D(input1, weights1, {4, 4}, {0, 0, 0, 0});
+    auto output1 = test_cm.output(conv1);
+
+std::cout << "in compile conv, setting comilation descriptors" << std::endl;
+   std::string blobName = "./test_conv.blob";
+    unit->compilationDescriptor()["GenerateBlob"]["fileName"] = blobName;
+    unit->compilationDescriptor()["GenerateBlob"]["enableFileOutput"] = true;
+    unit->compilationDescriptor()["GenerateBlob"]["enableRAMOutput"] = false;
+    unit->compilationDescriptor()["GenerateDot"]["output"] = std::string("blob_output_conv_01.dot");
+    unit->compilationDescriptor()["GenerateDot"]["scope"] = std::string("OpControlModel");
+    unit->compilationDescriptor()["GenerateDot"]["content"] = std::string("full");
+    unit->compilationDescriptor()["GenerateDot"]["html"] = true;
+    unit->compilationDescriptor()["MarkHardwareOperations"]["disableHardware"] = true;
+    unit->loadTargetDescriptor("/home/patd/MCM/mcmCompiler/config/target/ma2480.json");
+    unit->initialize();
+    //unit.passManager().disablePass(mv::PassGenre::Validation);
+    unit->passManager().disablePass(mv::PassGenre::Serialization);
+    unit->passManager().enablePass(mv::PassGenre::Serialization, "GenerateBlob");
+    unit->initialize();
+std::cout << "in compile conv, running compile" << std::endl;
+    auto compOutput = unit->run();
+
+
             break;
         }
         case OP_TYPEID::ConvolutionBackpropFilters:
