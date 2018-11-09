@@ -508,14 +508,28 @@ std::cout << "in case do convolution " << std::endl;
                                          "output[batch][output_channel]",
                                          false);
 */
+
+            std::cout << "in compile conv, input shape size 0 = " << get_input_shape(op, 0)[0] << std::endl;
+            std::cout << "in compile conv, input shape size 1 = " << get_input_shape(op, 0)[1] << std::endl;
+            std::cout << "in compile conv, input shape size 2 = " << get_input_shape(op, 0)[2] << std::endl;
+            std::cout << "in compile conv, input shape size 3 = " << get_input_shape(op, 0)[3] << std::endl;
+            std::cout << "in compile conv, filter shape size 0 = " << get_input_shape(op, 1)[0] << std::endl;
+            std::cout << "in compile conv, filter shape size 1 = " << get_input_shape(op, 1)[1] << std::endl;
+            std::cout << "in compile conv, filter shape size 2 = " << get_input_shape(op, 1)[2] << std::endl;
+            std::cout << "in compile conv, filter shape size 3 = " << get_input_shape(op, 1)[3] << std::endl;
+
             auto unit = new mv::CompilationUnit("test_backend");
 
 //            mv::Logger::setVerboseLevel(mv::Logger::VerboseLevel::VerboseDebug);
 
             mv::CompositionalModel& test_cm = unit->model();
 
+            size_t input_w = get_input_shape(op, 0)[2];
+            size_t input_c = get_input_shape(op, 0)[3];
+
             // Compose minimal functional computation model - one computation operation of type conv2D
-            auto input1 = test_cm.input({32, 32, 1}, mv::DTypeType::Float16, mv::Order("WHC"));
+//            auto input1 = test_cm.input({32, 32, 1}, mv::DTypeType::Float16, mv::Order("WHC"));
+            auto input1 = test_cm.input({input_w, input_c, 1}, mv::DTypeType::Float16, mv::Order("WHC"));
             std::vector<double> weights1Data({ 0.1111, 0.1121, 0.1131, 0.1141, 0.1151, 0.1161, 0.1171, 0.1181, 0.1191});
             auto weights1 = test_cm.constant(weights1Data, {3, 3, 1, 1}, mv::DTypeType::Float16, mv::Order("NCHW"));
             auto conv1 = test_cm.conv2D(input1, weights1, {4, 4}, {0, 0, 0, 0});
