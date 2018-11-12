@@ -468,9 +468,8 @@ std::cout << "in MB compile" << std::endl;
         }
         case OP_TYPEID::Convolution:
         {
-std::cout << "in case do convolution " << std::endl;
+        std::cout << "in backend compile graph traverse: case convolution " << std::endl;
 
-/*
 
             arguments_check(op, 2, 1);
 
@@ -480,7 +479,7 @@ std::cout << "in case do convolution " << std::endl;
             const Strides& data_dilation = conv_op->get_data_dilation_strides();
             const CoordinateDiff& pad_below = conv_op->get_padding_below();
             const CoordinateDiff& pad_above = conv_op->get_padding_above();
-
+/*
             // clDNN has quite limited support for Convolution operation
             // following are the checks to go with workaround
             if ((win_stride.size() > 2) || (pad_below.size() > 2 || pad_above.size() > 2) ||
@@ -509,14 +508,20 @@ std::cout << "in case do convolution " << std::endl;
                                          false);
 */
 
-            std::cout << "in compile conv, input shape size 0 = " << get_input_shape(op, 0)[0] << std::endl;
-            std::cout << "in compile conv, input shape size 1 = " << get_input_shape(op, 0)[1] << std::endl;
-            std::cout << "in compile conv, input shape size 2 = " << get_input_shape(op, 0)[2] << std::endl;
-            std::cout << "in compile conv, input shape size 3 = " << get_input_shape(op, 0)[3] << std::endl;
-            std::cout << "in compile conv, filter shape size 0 = " << get_input_shape(op, 1)[0] << std::endl;
-            std::cout << "in compile conv, filter shape size 1 = " << get_input_shape(op, 1)[1] << std::endl;
-            std::cout << "in compile conv, filter shape size 2 = " << get_input_shape(op, 1)[2] << std::endl;
-            std::cout << "in compile conv, filter shape size 3 = " << get_input_shape(op, 1)[3] << std::endl;
+            std::cout << "in compile conv, input shape size n = " << get_input_shape(op, 0)[0] << std::endl;
+            std::cout << "in compile conv, input shape size c = " << get_input_shape(op, 0)[1] << std::endl;
+            std::cout << "in compile conv, input shape size h = " << get_input_shape(op, 0)[2] << std::endl;
+            std::cout << "in compile conv, input shape size w = " << get_input_shape(op, 0)[3] << std::endl;
+            std::cout << "in compile conv, filter shape size n = " << get_input_shape(op, 1)[0] << std::endl;
+            std::cout << "in compile conv, filter shape size c = " << get_input_shape(op, 1)[1] << std::endl;
+            std::cout << "in compile conv, filter shape size h = " << get_input_shape(op, 1)[2] << std::endl;
+            std::cout << "in compile conv, filter shape size w = " << get_input_shape(op, 1)[3] << std::endl;
+            std::cout << "in compile conv, filter strideX = " << conv_op->get_window_movement_strides()[0] << std::endl;
+            std::cout << "in compile conv, filter strideY = " << conv_op->get_window_movement_strides()[1] << std::endl;
+            std::cout << "in compile conv, pad left = " << conv_op->get_padding_below()[0] << std::endl;
+            std::cout << "in compile conv, pad top = " << conv_op->get_padding_below()[1] << std::endl;
+            std::cout << "in compile conv, pad right = " << conv_op->get_padding_above()[0] << std::endl;
+            std::cout << "in compile conv, pad bottom = " << conv_op->get_padding_above()[1] << std::endl;
 
             auto unit = new mv::CompilationUnit("test_backend");
 
@@ -524,15 +529,26 @@ std::cout << "in case do convolution " << std::endl;
 
             mv::CompositionalModel& test_cm = unit->model();
 
-            size_t input_w = get_input_shape(op, 0)[2];
-            size_t input_c = get_input_shape(op, 0)[3];
+            size_t input_c = get_input_shape(op, 0)[1];
+            size_t input_h = get_input_shape(op, 0)[2];
+            size_t input_w = get_input_shape(op, 0)[3];
+            auto kernel_size_n = get_input_shape(op, 1)[0];
+            auto kernel_size_c = get_input_shape(op, 1)[1];
+            auto kernel_size_h = get_input_shape(op, 1)[2];
+            auto kernel_size_w = get_input_shape(op, 1)[3];
+            auto kernel_stride_x = conv_op->get_window_movement_strides()[0];
+            auto kernel_stride_y = conv_op->get_window_movement_strides()[1];
+            auto pad_l = conv_op->get_padding_below()[0];
+            auto pad_t = conv_op->get_padding_below()[1];
+            auto pad_r = conv_op->get_padding_above()[0];
+            auto pad_b = conv_op->get_padding_above()[1];
 
             // Compose minimal functional computation model - one computation operation of type conv2D
 //            auto input1 = test_cm.input({32, 32, 1}, mv::DTypeType::Float16, mv::Order("WHC"));
-            auto input1 = test_cm.input({input_w, input_c, 1}, mv::DTypeType::Float16, mv::Order("WHC"));
-            std::vector<double> weights1Data({ 0.1111, 0.1121, 0.1131, 0.1141, 0.1151, 0.1161, 0.1171, 0.1181, 0.1191});
-            auto weights1 = test_cm.constant(weights1Data, {3, 3, 1, 1}, mv::DTypeType::Float16, mv::Order("NCHW"));
-            auto conv1 = test_cm.conv2D(input1, weights1, {4, 4}, {0, 0, 0, 0});
+            auto input1 = test_cm.input({input_w, input_h, input_c}, mv::DTypeType::Float16, mv::Order("WHC"));
+            std::vector<double> weights1Data({ 0.1111, 0.1121, 0.1131, 0.1141, 0.1151, 0.1161, 0.1171, 0.1181, 0.1191,  0.1111, 0.1121, 0.1131, 0.1141, 0.1151, 0.1161, 0.1171, 0.1181, 0.1191});
+            auto weights1 = test_cm.constant(weights1Data, {kernel_size_w, kernel_size_h, kernel_size_c, kernel_size_n}, mv::DTypeType::Float16, mv::Order("NCHW"));
+            auto conv1 = test_cm.conv2D(input1, weights1, {kernel_stride_x, kernel_stride_y}, {pad_l, pad_r, pad_t, pad_b});
             auto output1 = test_cm.output(conv1);
 
             std::cout << "in compile conv, setting comilation descriptors" << std::endl;
